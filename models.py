@@ -1,21 +1,23 @@
 from enum import Enum
 
 
-class SeqMessages(Enum):
-    INCREMENT = "increment progressively"
-    ACTIVATE = "activate"
-    PRESS = "press"
-    RELEASE = "release"
-    WAIT = "go to initial position and wait"
+class Seq(Enum):
+    INCREMENT = 1
+    ACTIVATE = 2
+    PRESS = 3
+    RELEASE = 4
+    WAIT = 5
+
+
+class SignalType(Enum):
+    Instant = 1
+    Periodic = 2
+
 
 class ComponentType(Enum):
     AllOrNothing = 1
     Continuous = 2
     Discrete = 3
-
-class SignalType(Enum):
-    Instant = 1
-    Periodic = 2
 
 class Component:
     def __init__(self, name: str, ctype: ComponentType, stype: SignalType):

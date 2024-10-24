@@ -1,1 +1,2 @@
 SIZE = 15
+ANALYSIS_PRECISION = 2  # 2 looks good
