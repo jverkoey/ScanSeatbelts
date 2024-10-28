@@ -27,12 +27,12 @@ def base64_to_ints(b64_string):
     return decoded_ints
 
 
-def plot_data(df, num_octets, arbitration_id):
-    fig, axs = plt.subplots(num_octets, 1, figsize=(8, num_octets * 2))  # Une subplot par octet
-    if num_octets == 1:
+def plot_data(df, num_bytes, arbitration_id):
+    fig, axs = plt.subplots(num_bytes, 1, figsize=(8, num_bytes * 2))  # Une subplot par octet
+    if num_bytes == 1:
         axs = [axs]
 
-    for i in range(num_octets):
+    for i in range(num_bytes):
         axs[i].plot(df['timestamp'], df[f'byte_{i + 1}'], linestyle='-', label=f'Byte {i + 1}')
         axs[i].set_xlabel('Timestamp')
         axs[i].set_ylabel(f'Byte {i + 1}')
@@ -41,6 +41,16 @@ def plot_data(df, num_octets, arbitration_id):
 
     plt.suptitle(f'Arbitration ID {arbitration_id} - Byte Data')
     plt.tight_layout(rect=[0, 0, 1, 0.96])
+    plt.show()
+
+
+def plot_one_byte(df, byte, arbitration_id):
+    plt.plot(df['timestamp'], df[f'byte_{byte}'], linestyle='-', label=f'Byte {byte}')
+    plt.xlabel('Timestamp')
+    plt.ylabel(f'Byte {byte}')
+    plt.grid(True)
+    plt.legend(loc='upper right')
+    plt.title(f'Arbitration ID {arbitration_id} - Byte {byte}')
     plt.show()
 
 
@@ -53,20 +63,42 @@ def gen_expected_pattern(seq: list[tuple[int, Seq]]) -> int:
     return expected_pattern
 
 
+def get_spacial_pattern(pattern, size):
+    tmp = pattern[0]
+    spacial_pattern = [tmp]
+    for i in range(1, size):
+        if (c := pattern[i]) != tmp:
+            spacial_pattern.append(c)
+            tmp = c
+
+    return spacial_pattern
+
+
 def compare(data, expected_pattern, delta):
     SIZE_ = round(delta)*ANALYSIS_PRECISION
     step = len(data) // SIZE_  # ~frames per second
     current_pattern = [0]*SIZE_
-    meant_data = [0]*SIZE_
-    for i in range(0, SIZE_):
-        meant_data[i] = data[i*step:(i+1)*step].mean()
-
+    prev_meant_data, meant_data = data[:step].mean(), 0
+    score = 0
+    tmp = 1
     for i in range(1, SIZE_):
-        s = round(float(meant_data[i] - meant_data[i-1])) 
-        current_pattern[i] = 1 if s > 0 else -1 if s < 0 else 0
+        meant_data = data[i*step:(i+1)*step].mean()
+        s = round(float(meant_data - prev_meant_data)) 
+        current_pattern[i] = (1 if s > 0 else 0) # TODO: mettre -1 pour la décroissance ?
+        prev_meant_data = meant_data
+        
+        # temporal comparison
+        if current_pattern[i] == expected_pattern[i]:
+            tmp += 1
+            score += tmp**(current_pattern[i]+1)  # TODO: better heuristic ?
 
-    print(current_pattern)
-    return current_pattern
+        else:
+            tmp = 1
+
+    # spacial comparison
+    score *= get_spacial_pattern(expected_pattern, SIZE_) == get_spacial_pattern(current_pattern, SIZE_)
+
+    return score
 
 
 def analyze(name: str):
@@ -81,16 +113,24 @@ def analyze(name: str):
     dfs_by_arbitration_id = {arbitration_id: group for arbitration_id, group in df.groupby('arbitration_id')}
 
     expected_pattern = gen_expected_pattern(seq)
-    print(expected_pattern, '\n')
+    # print(expected_pattern, '\n')
 
+    scores = {}
     for arbitration_id, df_group in dfs_by_arbitration_id.items():
-        num_octets = df_group['data_ints'].apply(len).max()
+        num_bytes = df_group['data_ints'].apply(len).max()
 
-        if arbitration_id == "0x244":
-            #plot_data(df_group, num_octets, arbitration_id)
+        # plot_data(df_group, num_bytes, arbitration_id)
 
-            # TODO: compare data to expected pattern
-            for i in range(num_octets):
-                current_pattern = compare(df_group[f'byte_{i+1}'], expected_pattern, delta)
+        try:
+        # TODO: compare data to expected pattern
+            for i in range(num_bytes):
+                scores[compare(df_group[f'byte_{i+1}'], expected_pattern, delta)] = arbitration_id, i+1
 
-            # plot_data(df_group, num_octets, arbitration_id)
+        except Exception as e:
+            print(f"Error analyzing arbitration ID {arbitration_id}: {e}")
+    
+    max_score = max(scores.keys())
+    print("\nAnalysis complete.")
+    print("Suspected ID:", scores[max_score][0], "| Octet:", scores[max_score][1], "| Score:", max_score)
+    # plot the corresponding byte
+    plot_one_byte(dfs_by_arbitration_id[scores[max_score][0]], scores[max_score][1], scores[max_score][0])
