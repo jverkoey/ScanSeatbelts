@@ -24,3 +24,13 @@ You can specify your listenning interface/channel in `config.yaml`, as well as t
 Then you can use: 
 - `python dump.py` to dump data frames with the provided sequence
 - `python analyze.py` to analyse the dump, and return the most likely CAN ID associated with the specified component
+
+
+## I don't have any car but I want to test it, how ?
+You can use `ICSim` simulator to create a virtual environement with a CAN BUS.
+
+Before using it, you have to create a virtual CAN interface:
+```bash
+chmod +x emulate-can.sh
+./emulate-can.sh
+```

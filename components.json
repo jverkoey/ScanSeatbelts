@@ -1,7 +1,7 @@
 [
     {
         "name": "BrakePedal",
-        "type": 1, 
+        "type": 2, 
         "signal": 1
     },
     {

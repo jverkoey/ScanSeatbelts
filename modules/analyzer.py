@@ -42,7 +42,7 @@ def compare(data, expected_pattern, delta):
         if current_pattern[i] == expected_pattern[i]:
             tmp += 1
             score += tmp**(current_pattern[i]+1)  # TODO: better heuristic ?
-            
+
         else:
             tmp = 1
 
@@ -83,5 +83,8 @@ def analyze(name: str):
     max_score = max(scores.keys())
     print("\nAnalysis complete.")
     print("Suspected ID:", scores[max_score][0], "| Octet:", scores[max_score][1], "| Score:", max_score)
+
     # plot the corresponding byte
     plot_one_byte(dfs_by_arbitration_id[scores[max_score][0]], scores[max_score][1], scores[max_score][0])
+    
+    return

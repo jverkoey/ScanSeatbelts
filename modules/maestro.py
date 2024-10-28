@@ -40,7 +40,7 @@ def orchestrates_sequence(component: Component, sequence, default_msg, rep: bool
     init_line = "-" * SIZE
     messages = [seqToMessage(default_msg.value)] * SIZE
     for step in sequence:
-        messages[step[0]] = sequToMessage(step[1].value)
+        messages[step[0]] = seqToMessage(step[1].value)
         init_line = init_line[:step[0]] + "X" + init_line[step[0]+1:]
     
     line = ""
@@ -88,11 +88,13 @@ def generate_sequence(component: Component):
         input("Press Enter to continue...")
         default_msg = Seq.RELEASE
         if component.stype == SignalType.Instant:
-            # TODO: better
+            # TODO: improve
             seq = [(2, Seq.PRESS), (4, Seq.PRESS), (5, Seq.PRESS), (8, Seq.PRESS), (10, Seq.PRESS), (12, Seq.PRESS)]
-        else:
-            # TODO: better
+        elif component.stype == SignalType.Periodic:
+            # TODO: improve
             seq = [(i, Seq.ACTIVATE) for i in range(1, 5)] + [(i, Seq.ACTIVATE) for i in range(7, SIZE-2)]
+        else:
+            raise ValueError("Invalid SignalType.")
 
         return orchestrates_sequence(component, seq, default_msg, False)
     
