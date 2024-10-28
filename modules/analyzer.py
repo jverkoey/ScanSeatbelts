@@ -51,10 +51,10 @@ def compare_inst_cont(data, expected_pattern, delta, component: Component) -> in
 def compare_periodic(data, expected_pattern, delta, component: Component) -> int:
     raise NotImplementedError
 
-def compare_aon_cont(data, expected_pattern, delta, component):
+def compare_aon_cont(data, expected_pattern, delta, component: Component) -> int:
     raise NotImplementedError
 
-def compare_inst_disc(data, expected_pattern, delta, component):
+def compare_inst_disc(data, expected_pattern, delta, component: Component) -> int:
     raise NotImplementedError
 
 def compare(data, expected_pattern, delta, component: Component) -> int:
