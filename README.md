@@ -19,6 +19,8 @@ pip install -r requirements.txt
 
 For windows, replace `source venv/bin/activate` by `venv\Scripts\activate`
 
+You can specify your listenning interface/channel in `config.yaml`, as well as the dump folder.
+
 Then you can use: 
 - `python dump.py` to dump data frames with the provided sequence
 - `python analyze.py` to analyse the dump, and return the most likely CAN ID associated with the specified component
