@@ -1,5 +1,5 @@
 import pandas as pd
-from modules import Seq
+from modules import Seq, Component
 from modules.utils import plot_data, plot_one_byte, load_data, base64_to_ints
 from settings import SIZE, ANALYSIS_PRECISION
 
@@ -25,7 +25,7 @@ def get_spacial_pattern(pattern, size):
     return spacial_pattern
 
 
-def compare(data, expected_pattern, delta):
+def compare_inst_cont(data, expected_pattern, delta, component: Component) -> int:
     SIZE_ = round(delta)*ANALYSIS_PRECISION
     step = len(data) // SIZE_  # ~frames per second
     current_pattern = [0]*SIZE_
@@ -45,6 +45,34 @@ def compare(data, expected_pattern, delta):
 
         else:
             tmp = 1
+    
+    return score
+
+def compare_periodic(data, expected_pattern, delta, component: Component) -> int:
+    raise NotImplementedError
+
+def compare_aon_cont(data, expected_pattern, delta, component):
+    raise NotImplementedError
+
+def compare_inst_disc(data, expected_pattern, delta, component):
+    raise NotImplementedError
+
+def compare(data, expected_pattern, delta, component: Component) -> int:
+    if component.stype == SignalType.Instant:
+        if component.ctype == ComponentType.Continuous:  # like an accelerator
+            score = compare_inst_cont(data, expected_pattern, delta, component)
+
+        elif component.ctype == ComponentType.AllOrNothing:  # like a button
+            score = compare_aon_cont(data, expected_pattern, delta, component)
+        
+        elif component.ctype == ComponentType.Discrete:  # like a gearbox
+            score = compare_inst_disc(data, expected_pattern, delta, component)
+    
+    elif component.stype == SignalType.Periodic and component.ctype == ComponentType.AllOrNothing:  # like turn signals
+        score = compare_periodic(data, expected_pattern, delta, component)
+
+    else:
+        raise NotImplementedError
 
     # spacial comparison
     score *= get_spacial_pattern(expected_pattern, SIZE_) == get_spacial_pattern(current_pattern, SIZE_)
@@ -54,7 +82,7 @@ def compare(data, expected_pattern, delta):
 
 def analyze(name: str):
     print("Analyzing the file...")
-    df, seq, delta = load_data(name)
+    df, seq, delta, component = load_data(name)
 
     # Format data
     df['data_ints'] = df['data'].apply(base64_to_ints)
@@ -75,7 +103,7 @@ def analyze(name: str):
         try:
         # TODO: compare data to expected pattern
             for i in range(num_bytes):
-                scores[compare(df_group[f'byte_{i+1}'], expected_pattern, delta)] = arbitration_id, i+1
+                scores[compare(df_group[f'byte_{i+1}'], expected_pattern, delta, component)] = arbitration_id, i+1
 
         except Exception as e:
             print(f"Error analyzing arbitration ID {arbitration_id}: {e}")

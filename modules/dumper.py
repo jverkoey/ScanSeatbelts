@@ -26,7 +26,7 @@ def load_config():
     return config, file_path
 
 
-def end_checks(file_path: str, sequence: list, delta: float):
+def end_checks(file_path: str, sequence: list, delta: float, componentIndex: int):
     print(f"File {file_path} has been created.")
     print('Do you want to save it ? (o/n)')
     choice = input()
@@ -36,7 +36,7 @@ def end_checks(file_path: str, sequence: list, delta: float):
     else:
         # TODO: do not do this here
         with open(file_path.replace('.csv', '.seq'), 'wt') as file:
-            file.write(f"{delta}\n")
+            file.write(f"{delta}:{componentIndex}\n")
             for step in sequence:
                 file.write(f"{step[0]}:{step[1].value}\n")
         print(f"File {file_path} has been saved.")

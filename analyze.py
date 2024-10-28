@@ -1,20 +1,6 @@
-from modules import *
-import os
+from modules.utils import list_files
+from modules.analyzer import analyze
 
-
-def list_files():
-    os.chdir('dumps')
-    datas = {}
-    files = os.listdir(".")
-    files = [file for file in files if os.path.isfile(os.path.join(".", file))]
-    
-    for i, file in enumerate(files):
-        if file.endswith('.csv'):
-            data_name = file.split('.')[0]
-            datas[i] = data_name
-            print(f"{i}. {data_name}")
-
-    return datas
 
 
 if __name__ == "__main__":

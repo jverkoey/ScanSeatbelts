@@ -1,4 +1,5 @@
 from models import Component, ComponentType, SignalType, Seq
+from modules.utils import load_components
 from modules.dumper import *
 from settings import SIZE
 from time import sleep, perf_counter
@@ -71,8 +72,9 @@ def orchestrates_sequence(component: Component, sequence, default_msg, rep: bool
             if again.lower() == "o":
                 os.remove(file_path)
                 orchestrates_sequence(component, sequence, default_msg, True)
-
-            end_checks(file_path, sequence, delta)
+            
+            print("compIndex: ", compIndex)
+            end_checks(file_path, sequence, delta, compIndex)
             print("Sequence reproduced, use the analyzer to determine the ID of the component.")
 
     except KeyboardInterrupt:
@@ -122,33 +124,16 @@ def choose_component(components: list[Component]):
     except ValueError:
         raise ValueError("Invalid choice.")
 
+    global compIndex
+    compIndex = choice-1
+    
+    print("compIndex: ", compIndex)
     comp = components[choice-1]
     print(f"Component {comp.name} choosen.")
     return generate_sequence(comp)
 
 
-def load_components(components: dict):
-    comps = []
-    for component in components:
-        comps.append(Component(name=component['name'], ctype=ComponentType(component['type']), stype=SignalType(component['signal'])))
-
-    return comps
-
-
 def wake_up_maestro():
-    try:
-        with open("components.json", "r") as file:
-            file_content = file.read()
-
-        json_comps = json.loads(file_content)
-        comps = load_components(json_comps)
-    
-    except FileNotFoundError:
-        raise FileNotFoundError("File components.json not found.")
-    except json.JSONDecodeError:
-        raise json.JSONDecodeError("Invalid components.json file.")
-    except Exception as e:
-        raise Exception(f"Error when Maestro woke up: {e}")
-
+    comps = load_components()
     print("Maestro is ready to guide you.")
     return choose_component(comps)

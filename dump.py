@@ -1,5 +1,5 @@
 
-from modules import *
+from modules.maestro import wake_up_maestro
 
 
 if __name__ == "__main__":

@@ -1,7 +1,9 @@
 import matplotlib.pyplot as plt
-from modules import Seq
+from models import Component, ComponentType, SignalType, Seq
 import pandas as pd
 import base64
+import json
+import os
 
 
 def plot_data(df, num_bytes, arbitration_id):
@@ -39,12 +41,17 @@ def load_data(name: str):
         df = pd.read_csv(csv_path)
         
         with open(seq_path, "r") as file:
-            delta = float(file.readline().strip())
+            header = file.readline().strip().split(":", 1)
+            delta = float(header[0])
+            component = load_components(compIndex=int(header[1]))
             seq = [(int(parts[0]), Seq(int(parts[1]))) for line in file for parts in [line.strip().split(":", 1)]]
 
-        return df, seq, delta
+        return df, seq, delta, component
     except FileNotFoundError:
         print("Invalid or nonexistent file.")
+        exit(1)
+    except Exception as e:
+        print(f"Error while loading data: {e}")
         exit(1)
 
 
@@ -52,3 +59,50 @@ def base64_to_ints(b64_string):
     decoded_bytes = base64.b64decode(b64_string)
     decoded_ints = [int(byte) for byte in decoded_bytes]
     return decoded_ints
+
+
+def list_files():
+    os.chdir('dumps')
+    datas = {}
+    files = os.listdir(".")
+    files = [file for file in files if os.path.isfile(os.path.join(".", file))]
+    
+    i = 1
+    for file in files:
+        if file.endswith('.csv'):
+            data_name = file.split('.')[0]
+            datas[i] = data_name
+            print(f"{i}. {data_name}")
+            i += 1
+    
+    return datas
+
+
+def build_components(components: dict):
+    comps = []
+    for component in components:
+        comps.append(Component(name=component['name'], ctype=ComponentType(component['type']), stype=SignalType(component['signal'])))
+
+    return comps
+
+def load_components(compIndex: int = None):
+    try:
+        os.chdir('..')
+        with open("components.json", "r") as file:
+            file_content = file.read()
+        
+        json_comps = json.loads(file_content)
+        if compIndex is not None:
+            component = json_comps[compIndex]
+            return Component(name=component['name'], ctype=ComponentType(component['type']), stype=SignalType(component['signal']))
+
+        comps = build_components(json_comps)
+    
+    except FileNotFoundError:
+        raise FileNotFoundError("File components.json not found.")
+    except json.JSONDecodeError:
+        raise json.JSONDecodeError("Invalid components.json file.")
+    except Exception as e:
+        raise Exception(f"Error while loading components: {e}")
+
+    return comps
