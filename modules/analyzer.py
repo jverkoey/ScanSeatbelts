@@ -42,7 +42,7 @@ def compare(data, expected_pattern, delta):
         if current_pattern[i] == expected_pattern[i]:
             tmp += 1
             score += tmp**(current_pattern[i]+1)  # TODO: better heuristic ?
-
+            
         else:
             tmp = 1
 
