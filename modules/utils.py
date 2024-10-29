@@ -42,11 +42,11 @@ def load_data(name: str):
         
         with open(seq_path, "r") as file:
             header = file.readline().strip().split(":", 1)
-            delta = float(header[0])
+            assert round(float(header[0])) == 15
             component = load_components(compIndex=int(header[1]))
             seq = [(int(parts[0]), Seq(int(parts[1]))) for line in file for parts in [line.strip().split(":", 1)]]
 
-        return df, seq, delta, component
+        return df, seq, component
     except FileNotFoundError:
         print("Invalid or nonexistent file.")
         exit(1)

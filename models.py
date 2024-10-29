@@ -35,3 +35,6 @@ class Component:
 
     def isDiscrete(self):
         return self.type == ComponentType.Discrete
+
+    def __str__(self):
+        return f"Name: {self.name} | ctype: {self.ctype} | stype: {self.stype}"
