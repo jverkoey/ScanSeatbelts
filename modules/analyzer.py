@@ -28,7 +28,7 @@ def get_spacial_pattern(pattern, size):
     return spacial_pattern
 
 
-def get_freq(data):
+def get_freq_and_val(data):
     intervals = []
     prev = -1
     for i in range(0, len(data)):
@@ -37,15 +37,14 @@ def get_freq(data):
                 intervals.append((i - prev, int(data[i])))
             prev = i
 
-    print(intervals)
-    
+    if len(intervals) == 0:
+        return 0, 0
+
     for i in range(1, len(intervals)):
         if intervals[i] != intervals[i-1]:
-            return 0
+            return 0, 0
 
-    # TODO: sauvegarder la valeur interval[i][1] pour connaitre la valeur du clignotant
-
-    return 1/intervals[0][0]
+    return 1/intervals[0][0], intervals[0][1]
 
 def compare_periodic(data, expected_pattern, size, component: Component):
     windows = []
@@ -61,11 +60,15 @@ def compare_periodic(data, expected_pattern, size, component: Component):
     if prev == 2: windows.append((start, i-1, prev))
 
     data_sequence = np.array(data)
-    init_freq = get_freq(data_sequence[windows[0][0]:windows[0][1]])
+    init_freq_and_val = get_freq_and_val(data_sequence[windows[0][0]:windows[0][1]])
+
+    # we are looking for a frequency < 1 because it is not continuous
+    if (not 0 < init_freq_and_val[0] < 1) or init_freq_and_val[1] == 0: return 0
     for i in range(1, len(windows)):
-        if get_freq(data_sequence[windows[i][0]:windows[i][1]]) != init_freq:
+        if get_freq_and_val(data_sequence[windows[i][0]:windows[i][1]]) != init_freq_and_val:
             return 0
-            
+    
+    print("data: ", init_freq_and_val)
     return 1
 
 def compare_inst_cont(data, expected_pattern, size, component: Component):
@@ -90,9 +93,11 @@ def compare_inst_cont(data, expected_pattern, size, component: Component):
     
     return score, current_pattern
 
+# TODO
 def compare_aon_cont(data, expected_pattern, size, component: Component):
     raise NotImplementedError("Not implemented")
 
+# TODO
 def compare_inst_disc(data, expected_pattern, size, component: Component):
     raise NotImplementedError("Not implemented")
 
