@@ -1,8 +1,10 @@
-import matplotlib.pyplot as plt
 from models import Component, ComponentType, SignalType, Seq
+import matplotlib.pyplot as plt
+from datetime import datetime
 import pandas as pd
 import base64
 import json
+import yaml
 import os
 
 
@@ -43,6 +45,7 @@ def load_data(name: str):
         with open(seq_path, "r") as file:
             header = file.readline().strip().split(":", 1)
             assert round(float(header[0])) == 15
+            os.chdir('..')
             component = load_components(compIndex=int(header[1]))
             seq = [(int(parts[0]), Seq(int(parts[1]))) for line in file for parts in [line.strip().split(":", 1)]]
 
@@ -62,7 +65,6 @@ def base64_to_ints(b64_string):
 
 
 def list_files():
-    os.chdir('dumps')
     datas = {}
     files = os.listdir(".")
     files = [file for file in files if os.path.isfile(os.path.join(".", file))]
@@ -74,7 +76,7 @@ def list_files():
             datas[i] = data_name
             print(f"{i}. {data_name}")
             i += 1
-    
+            
     return datas
 
 
@@ -87,7 +89,6 @@ def build_components(components: dict):
 
 def load_components(compIndex: int = None):
     try:
-        #os.chdir('..')
         with open("components.json", "r") as file:
             file_content = file.read()
         
@@ -106,3 +107,22 @@ def load_components(compIndex: int = None):
         raise Exception(f"Error while loading components: {e}")
 
     return comps
+
+
+
+def load_config():
+    try:
+        with open('config.yaml', 'rt') as file:
+            config = yaml.safe_load(file)
+
+        wdir = config['dumps_dir']
+        os.makedirs(wdir, exist_ok=True)
+        str_date = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+        file_path = f'{wdir}/{str_date}.csv'
+
+    except FileNotFoundError:
+        print("Invalid or nonexistent configuration file.")
+        print("Please create a config.yaml file in the current directory.")
+        exit(1)
+
+    return config, file_path

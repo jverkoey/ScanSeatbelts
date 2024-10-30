@@ -1,5 +1,5 @@
 from models import Component, ComponentType, SignalType, Seq
-from modules.utils import load_components
+from modules.utils import load_components, load_config
 from modules.dumper import *
 from settings import SIZE
 from time import sleep, perf_counter
