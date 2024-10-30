@@ -87,7 +87,7 @@ def build_components(components: dict):
 
 def load_components(compIndex: int = None):
     try:
-        os.chdir('..')
+        #os.chdir('..')
         with open("components.json", "r") as file:
             file_content = file.read()
         

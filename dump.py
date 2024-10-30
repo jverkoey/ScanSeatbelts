@@ -1,9 +1,11 @@
 
 from modules.maestro import wake_up_maestro
+from utils import ban
 
 
 if __name__ == "__main__":
     try:
+        ban("DUMPER")
         wake_up_maestro()
     except KeyboardInterrupt:
         print("\nExiting...")

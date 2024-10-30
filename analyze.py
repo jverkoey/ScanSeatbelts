@@ -1,11 +1,11 @@
 from modules.utils import list_files
 from modules.analyzer import analyze
-
+from utils import ban
 
 
 if __name__ == "__main__":
     try:
-        print("Welcome to the CAN bus analyzer.")
+        ban("ANALYZER")
         datas = list_files()
         ind = int(input("Which data do you want to analyze ?\n> "))
         assert 0 < ind <= len(datas)
