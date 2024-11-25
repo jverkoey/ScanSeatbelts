@@ -108,7 +108,7 @@ def generate_sequence(component: Component):
 
         return orchestrates_sequence(component, seq, default_msg, False)
 
-    raise NotImplementedError("Only AllOrNothing component is implemented.")
+    raise NotImplementedError("Not implemented.")
     
 
 def choose_component(components: list[Component]):

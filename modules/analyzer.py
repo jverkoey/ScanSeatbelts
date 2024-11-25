@@ -61,18 +61,6 @@ def get_freq_and_val(data):
 
     return 1/intervals[0][0], intervals[0][1]
 
-def compare_periodic(data, windows, component: Component):
-    data_sequence = np.array(data)
-    init_freq_and_val = get_freq_and_val(data_sequence[windows[0][0]:windows[0][1]])
-    
-    # we are looking for a frequency < 1 because it is not continuous
-    if (not 0 < init_freq_and_val[0] < 1) or init_freq_and_val[1] == 0: return 0, None
-    for i in range(1, len(windows)):
-        if get_freq_and_val(data_sequence[windows[i][0]:windows[i][1]]) != init_freq_and_val:
-            return 0, None
-    
-    return 1, None
-
 def compare_inst_cont(data, expected_pattern, component: Component):
     step = len(data) // SIZE_  # ~frames per second
     prev_meant_data, meant_data = data[:step].mean(), 0
@@ -95,9 +83,31 @@ def compare_inst_cont(data, expected_pattern, component: Component):
     
     return score, current_pattern
 
-# TODO
+def compare_periodic(data, windows, component: Component):
+    data_sequence = np.array(data)
+    init_freq_and_val = get_freq_and_val(data_sequence[windows[0][0]:windows[0][1]])
+    
+    # we are looking for a frequency < 1 because it is not continuous
+    if (not 0 < init_freq_and_val[0] < 1) or init_freq_and_val[1] == 0: return 0, None
+    for i in range(1, len(windows)):
+        if get_freq_and_val(data_sequence[windows[i][0]:windows[i][1]]) != init_freq_and_val:
+            return 0, None
+    
+    return 1, None
+
+# TODO: finish, verify and improve
 def compare_aon_cont(data, expected_pattern, component: Component):
-    raise NotImplementedError("Not implemented")
+    data_sequence = np.array(data)
+    score = 0
+    consecutives = 0
+
+    for i in range(SIZE_):
+        if data[i] == expected_pattern[i]:
+            score += 1 * (consecutives+1)
+        else:
+            consecutives = 0
+    
+    return score, None
 
 # TODO
 def compare_inst_disc(data, expected_pattern, component: Component):
