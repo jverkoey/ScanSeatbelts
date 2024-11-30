@@ -1,16 +1,16 @@
 [
     {
-        "name": "BrakePedal",
-        "type": 2, 
-        "signal": 1
-    },
-    {
         "name": "AccelPedal",
         "type": 2,
         "signal": 1
     },
     {
-        "name": "Wheel",
+        "name": "BrakePedal (unimplemented)",
+        "type": 2, 
+        "signal": 1
+    },
+    {
+        "name": "Wheel (unimplemented)",
         "type": 2,
         "signal": 1
     },
@@ -20,8 +20,13 @@
         "signal": 2
     },
     {
-        "name": "GearBox",
+        "name": "GearBox (unimplemented)",
         "type": 3,
+        "signal": 1
+    },
+    {
+        "name": "Doors (in dev)",
+        "type": 1,
         "signal": 1
     }
 ]

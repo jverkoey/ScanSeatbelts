@@ -73,7 +73,7 @@ def orchestrates_sequence(component: Component, sequence, default_msg, rep: bool
                 os.remove(file_path)
                 orchestrates_sequence(component, sequence, default_msg, True)
             
-            print("compIndex: ", compIndex)
+            print("compIndex: ", compIndex+1)
             end_checks(file_path, sequence, delta, compIndex)
             print("Sequence reproduced, use the analyzer to determine the ID of the component.")
 
@@ -89,10 +89,12 @@ def generate_sequence(component: Component):
         print("Generating a random sequence for AllOrNothing component.")
         input("Press Enter to continue...")
         default_msg = Seq.RELEASE
-        if component.stype == SignalType.Instant:
+        if component.stype == SignalType.Instant:  # like a button (on-off)
             # TODO: improve
-            seq = [(2, Seq.PRESS), (4, Seq.PRESS), (5, Seq.PRESS), (8, Seq.PRESS), (10, Seq.PRESS), (12, Seq.PRESS)]
-        elif component.stype == SignalType.Periodic:
+            # seq = [(2, Seq.PRESS), (4, Seq.PRESS), (5, Seq.PRESS), (8, Seq.PRESS), (10, Seq.PRESS), (12, Seq.PRESS)]
+            seq = [(i, Seq.ACTIVATE) for i in range(1, 5)] + [(i, Seq.ACTIVATE) for i in range(7, SIZE-2)]
+
+        elif component.stype == SignalType.Periodic:  # like turn signals
             # TODO: improve
             seq = [(i, Seq.ACTIVATE) for i in range(1, 5)] + [(i, Seq.ACTIVATE) for i in range(7, SIZE-2)]
         else:
@@ -100,7 +102,7 @@ def generate_sequence(component: Component):
 
         return orchestrates_sequence(component, seq, default_msg, False)
     
-    elif component.ctype == ComponentType.Continuous:
+    elif component.ctype == ComponentType.Continuous:  # like accel pedal
         print("Generating a random sequence for Continuous component.")
         input("Press Enter to continue...")
         default_msg = Seq.WAIT
@@ -113,8 +115,13 @@ def generate_sequence(component: Component):
 
 def choose_component(components: list[Component]):
     print("Choose a component:")
-    for i, component in enumerate(components):
-        print(f"{i+1}. {component.name}")
+    mid = (len(components) + 1) // 2
+    col1 = components[:mid]
+    col2 = components[mid:]
+    for i in range(mid):
+        col1_item = f"{i+1}. {col1[i].name}" if i < len(col1) else ""
+        col2_item = f"{i+1+mid}. {col2[i].name}" if i < len(col2) else ""
+        print(f"{col1_item}" +" "*(35-len(col1_item)) + f"{col2_item}")
 
     try:
         choice = int(input("> "))
@@ -127,7 +134,7 @@ def choose_component(components: list[Component]):
     global compIndex
     compIndex = choice-1
     
-    print("compIndex: ", compIndex)
+    print("compIndex: ", compIndex+1)
     comp = components[choice-1]
     print(f"Component {comp.name} choosen.")
     return generate_sequence(comp)

@@ -109,7 +109,7 @@ def load_components(compIndex: int = None):
     return comps
 
 
-
+# TODO: add the component name in the file name
 def load_config():
     try:
         with open('config.yaml', 'rt') as file:

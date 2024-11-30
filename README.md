@@ -36,3 +36,8 @@ Before using it, you have to create a virtual CAN interface:
 chmod +x emulate-can.sh
 ./emulate-can.sh
 ```
+
+You should find:
+- ID 0x188 for turnSignal
+- ID 0x244 for accelPedal 
+- ID 0x19B for Doors

@@ -19,6 +19,7 @@ class ComponentType(Enum):
     Continuous = 2
     Discrete = 3
 
+
 class Component:
     def __init__(self, name: str, ctype: ComponentType, stype: SignalType):
         self.name = name

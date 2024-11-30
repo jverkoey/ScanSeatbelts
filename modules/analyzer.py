@@ -36,12 +36,13 @@ def build_windows(expected_pattern):
     prev = expected_pattern[0]
     for i in range(1, SIZE_):
         if expected_pattern[i] != prev:
-            if prev == 2: windows.append((start, i-1, prev))
+            if prev != 0: windows.append((start, i-1, prev))
             start = i
         prev = expected_pattern[i]
-    if prev == 2: windows.append((start, i-1, prev))
+    if prev != 0: windows.append((start, i-1, prev))
 
     return windows
+
 
 def get_freq_and_val(data):
     intervals = []
@@ -60,6 +61,7 @@ def get_freq_and_val(data):
             return 0, 0
 
     return 1/intervals[0][0], intervals[0][1]
+
 
 def compare_inst_cont(data, expected_pattern, component: Component):
     step = len(data) // SIZE_  # ~frames per second
@@ -83,6 +85,7 @@ def compare_inst_cont(data, expected_pattern, component: Component):
     
     return score, current_pattern
 
+
 def compare_periodic(data, windows, component: Component):
     data_sequence = np.array(data)
     init_freq_and_val = get_freq_and_val(data_sequence[windows[0][0]:windows[0][1]])
@@ -95,19 +98,21 @@ def compare_periodic(data, windows, component: Component):
     
     return 1, None
 
-# TODO: finish, verify and improve
-def compare_aon_cont(data, expected_pattern, component: Component):
+
+# TODO: improve
+def compare_aon(data, expected_pattern, component: Component):
     data_sequence = np.array(data)
     score = 0
     consecutives = 0
 
     for i in range(SIZE_):
-        if data[i] == expected_pattern[i]:
+        if data_sequence[i] * expected_pattern[i] > 0 or data_sequence[i] == expected_pattern[i]:  # check if they both describes the same event
             score += 1 * (consecutives+1)
         else:
             consecutives = 0
-    
+
     return score, None
+
 
 # TODO
 def compare_inst_disc(data, expected_pattern, component: Component):
@@ -126,10 +131,10 @@ def get_utils(expected_pattern, component: Component):
         if component.ctype == ComponentType.Continuous:  # like an accelerator
             return compare_inst_cont, expected_pattern, callback_score_calc
 
-        elif component.ctype == ComponentType.AllOrNothing:  # like a button
-            return compare_aon_cont, expected_pattern, callback_score_calc
+        elif component.ctype == ComponentType.AllOrNothing:  # like a button (on-off)
+            return compare_aon, build_windows(expected_pattern), callback_score_calc
         
-        elif component.ctype == ComponentType.Discrete:  # like a gearbox
+        elif component.ctype == ComponentType.Discrete:  # like a gearbox, with multiple possible values
             return compare_inst_disc, expected_pattern, callback_score_calc
 
     elif component.stype == SignalType.Periodic and component.ctype == ComponentType.AllOrNothing:  # like turn signals
@@ -157,9 +162,9 @@ def analyze(name: str):
     compare, util, callback = get_utils(expected_pattern, component)
 
     scores = {}
+    
     for arbitration_id, df_group in dfs_by_arbitration_id.items():
         num_bytes = df_group['data_ints'].apply(len).max()
-
         try:
             for i in range(num_bytes):
                 score, pattern = compare(df_group[f'byte_{i+1}'], util, component)
