@@ -28,5 +28,10 @@
         "name": "Doors (in dev)",
         "type": 1,
         "signal": 1
+    },
+{
+        "name": "Seatbelt (testing)",
+        "type": 1,
+        "signal": 1
     }
 ]

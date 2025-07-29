@@ -1,4 +1,4 @@
 BUS:
   interface: 'socketcan'
-  channel: 'vcan0'
+  channel: 'can0'
 dumps_dir: 'dumps'
